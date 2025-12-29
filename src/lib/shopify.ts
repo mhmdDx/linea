@@ -36,7 +36,7 @@ async function ShopifyData(query: string, variables = {}) {
 export async function getAllProducts() {
   const query = `
   {
-    products(first: 25) {
+    products(first: 250) {
       edges {
         node {
           id
@@ -411,7 +411,7 @@ export async function getProductsByCollection(handle: string) {
   const query = `
     query getCollection($handle: String!) {
       collection(handle: $handle) {
-        products(first: 25) {
+        products(first: 250) {
           edges {
             node {
               id
@@ -453,7 +453,7 @@ export async function getProductsByCollection(handle: string) {
 export async function getProductsByQuery(queryStr: string) {
   const query = `
     query getProducts($query: String!) {
-      products(first: 25, query: $query) {
+      products(first: 250, query: $query) {
         edges {
           node {
             id

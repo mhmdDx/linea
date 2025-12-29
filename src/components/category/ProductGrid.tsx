@@ -10,9 +10,10 @@ interface ProductGridProps {
   categoryHandle?: string;
   filters?: FilterState;
   sortBy?: string;
+  onProductCountChange?: (count: number) => void;
 }
 
-const ProductGrid = ({ categoryHandle, filters, sortBy }: ProductGridProps) => {
+const ProductGrid = ({ categoryHandle, filters, sortBy, onProductCountChange }: ProductGridProps) => {
   const [products, setProducts] = useState<any[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -110,7 +111,10 @@ const ProductGrid = ({ categoryHandle, filters, sortBy }: ProductGridProps) => {
     }
 
     setFilteredProducts(result);
-  }, [products, filters, sortBy]);
+    if (onProductCountChange) {
+      onProductCountChange(result.length);
+    }
+  }, [products, filters, sortBy, onProductCountChange]);
 
   if (loading) {
     return (

@@ -16,6 +16,7 @@ const Category = () => {
     materials: []
   });
   const [sortBy, setSortBy] = useState<string>("featured");
+  const [productCount, setProductCount] = useState<number>(0);
 
   const handleFiltersChange = (newFilters: FilterState) => {
     setFilters(newFilters);
@@ -37,7 +38,7 @@ const Category = () => {
         <FilterSortBar
           filtersOpen={filtersOpen}
           setFiltersOpen={setFiltersOpen}
-          itemCount={24}
+          itemCount={productCount}
           onFiltersChange={handleFiltersChange}
           onSortChange={handleSortChange}
         />
@@ -46,6 +47,7 @@ const Category = () => {
           categoryHandle={category}
           filters={filters}
           sortBy={sortBy}
+          onProductCountChange={setProductCount}
         />
       </main>
 

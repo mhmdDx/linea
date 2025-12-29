@@ -1,3 +1,4 @@
+import Autoplay from "embla-carousel-autoplay";
 import {
   Carousel,
   CarouselContent,
@@ -34,9 +35,14 @@ const FiftyFiftySection = () => {
     <section className="w-full relative px-0 mb-0">
       <Carousel
         setApi={setApi}
+        plugins={[
+          Autoplay({
+            delay: 4000,
+          }),
+        ]}
         opts={{
           align: "start",
-          loop: false,
+          loop: true,
         }}
         className="w-full"
       >
