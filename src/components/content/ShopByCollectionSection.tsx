@@ -4,7 +4,7 @@ import braceletImage from "@/assets/catogary/bercelet.PNG";
 import necklaceImage from "@/assets/catogary/neckless.PNG";
 import earringImage from "@/assets/catogary/earings.PNG";
 import ringImage from "@/assets/catogary/rings.PNG";
-import watchImage from "@/assets/catogary/WATCHES.JPG";
+import watchImage from "@/assets/catogary/watches.JPG";
 import FadeIn from "@/components/animations/FadeIn";
 import {
     Carousel,
