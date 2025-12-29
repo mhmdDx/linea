@@ -7,8 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
-import pantheonImage from "@/assets/pantheon.jpg";
-import eclipseImage from "@/assets/eclipse.jpg";
+import pantheonImage from "@/assets/rings-collection.png";
+import eclipseImage from "@/assets/earrings-collection.png";
 
 const Checkout = () => {
   const [showDiscountInput, setShowDiscountInput] = useState(false);
@@ -45,7 +45,7 @@ const Checkout = () => {
   });
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentComplete, setPaymentComplete] = useState(false);
-  
+
   // Mock cart data - in a real app this would come from state management
   const [cartItems, setCartItems] = useState([
     {
@@ -58,7 +58,7 @@ const Checkout = () => {
     },
     {
       id: 2,
-      name: "Eclipse Earrings", 
+      name: "Eclipse Earrings",
       price: "€1,850",
       quantity: 1,
       image: eclipseImage
@@ -69,8 +69,8 @@ const Checkout = () => {
     if (newQuantity <= 0) {
       setCartItems(items => items.filter(item => item.id !== id));
     } else {
-      setCartItems(items => 
-        items.map(item => 
+      setCartItems(items =>
+        items.map(item =>
           item.id === id ? { ...item, quantity: newQuantity } : item
         )
       );
@@ -92,7 +92,7 @@ const Checkout = () => {
         return 0; // Standard shipping is free
     }
   };
-  
+
   const shipping = getShippingCost();
   const total = subtotal + shipping;
 
@@ -120,10 +120,10 @@ const Checkout = () => {
 
   const handleCompleteOrder = async () => {
     setIsProcessing(true);
-    
+
     // Simulate payment processing
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
+
     setIsProcessing(false);
     setPaymentComplete(true);
   };
@@ -131,22 +131,22 @@ const Checkout = () => {
   return (
     <div className="min-h-screen bg-background">
       <CheckoutHeader />
-      
+
       <main className="pt-6 pb-12">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
+
             {/* Order Summary - First on mobile, last on desktop */}
             <div className="lg:col-span-1 lg:order-2">
               <div className="bg-muted/20 p-8 rounded-none sticky top-6">
                 <h2 className="text-lg font-light text-foreground mb-6">Order Summary</h2>
-                
+
                 <div className="space-y-6">
                   {cartItems.map((item) => (
                     <div key={item.id} className="flex gap-4">
                       <div className="w-20 h-20 bg-muted rounded-none overflow-hidden">
-                        <img 
-                          src={item.image} 
+                        <img
+                          src={item.image}
                           alt={item.name}
                           className="w-full h-full object-cover"
                         />
@@ -156,7 +156,7 @@ const Checkout = () => {
                         {item.size && (
                           <p className="text-sm text-muted-foreground">Size: {item.size}</p>
                         )}
-                        
+
                         {/* Quantity controls */}
                         <div className="flex items-center gap-2 mt-2">
                           <Button
@@ -190,7 +190,7 @@ const Checkout = () => {
                 {/* Discount Code Section */}
                 <div className="mt-8 pt-6 border-t border-muted-foreground/20">
                   {!showDiscountInput ? (
-                    <button 
+                    <button
                       onClick={() => setShowDiscountInput(true)}
                       className="text-sm text-foreground underline hover:no-underline transition-all"
                     >
@@ -206,7 +206,7 @@ const Checkout = () => {
                           placeholder="Enter discount code"
                           className="flex-1 rounded-none"
                         />
-                        <button 
+                        <button
                           onClick={handleDiscountSubmit}
                           className="text-sm text-foreground underline hover:no-underline transition-all px-2"
                         >
@@ -232,7 +232,7 @@ const Checkout = () => {
               {/* Customer Details Form */}
               <div className="bg-muted/20 p-8 rounded-none">
                 <h2 className="text-lg font-light text-foreground mb-6">Customer Details</h2>
-                
+
                 <div className="space-y-6">
                   <div>
                     <Label htmlFor="email" className="text-sm font-light text-foreground">
@@ -294,7 +294,7 @@ const Checkout = () => {
                   {/* Shipping Address */}
                   <div className="border-t border-muted-foreground/20 pt-6 mt-8">
                     <h3 className="text-base font-light text-foreground mb-4">Shipping Address</h3>
-                    
+
                     <div className="space-y-4">
                       <div>
                         <Label htmlFor="shippingAddress" className="text-sm font-light text-foreground">
@@ -363,8 +363,8 @@ const Checkout = () => {
                         checked={hasSeparateBilling}
                         onCheckedChange={(checked) => setHasSeparateBilling(checked === true)}
                       />
-                      <Label 
-                        htmlFor="separateBilling" 
+                      <Label
+                        htmlFor="separateBilling"
                         className="text-sm font-light text-foreground cursor-pointer"
                       >
                         Other billing address
@@ -376,7 +376,7 @@ const Checkout = () => {
                   {hasSeparateBilling && (
                     <div className="space-y-6 pt-4">
                       <h3 className="text-base font-light text-foreground">Billing Details</h3>
-                      
+
                       <div>
                         <Label htmlFor="billingEmail" className="text-sm font-light text-foreground">
                           Email Address *
@@ -495,173 +495,173 @@ const Checkout = () => {
                 </div>
               </div>
 
-            {/* Shipping Options */}
-            <div className="bg-muted/20 p-8 rounded-none">
-              <h2 className="text-lg font-light text-foreground mb-6">Shipping Options</h2>
-              
-              <RadioGroup 
-                value={shippingOption} 
-                onValueChange={setShippingOption}
-                className="space-y-4"
-              >
-                <div className="flex items-center justify-between p-4 border border-muted-foreground/20 rounded-none">
-                  <div className="flex items-center space-x-3">
-                    <RadioGroupItem value="standard" id="standard" />
-                    <Label htmlFor="standard" className="font-light text-foreground">
-                      Standard Shipping
-                    </Label>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    Free • 3-5 business days
-                  </div>
-                </div>
+              {/* Shipping Options */}
+              <div className="bg-muted/20 p-8 rounded-none">
+                <h2 className="text-lg font-light text-foreground mb-6">Shipping Options</h2>
 
-                <div className="flex items-center justify-between p-4 border border-muted-foreground/20 rounded-none">
-                  <div className="flex items-center space-x-3">
-                    <RadioGroupItem value="express" id="express" />
-                    <Label htmlFor="express" className="font-light text-foreground">
-                      Express Shipping
-                    </Label>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    €15 • 1-2 business days
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between p-4 border border-muted-foreground/20 rounded-none">
-                  <div className="flex items-center space-x-3">
-                    <RadioGroupItem value="overnight" id="overnight" />
-                    <Label htmlFor="overnight" className="font-light text-foreground">
-                      Overnight Delivery
-                    </Label>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    €35 • Next business day
-                  </div>
-                </div>
-              </RadioGroup>
-            </div>
-
-            {/* Payment Section */}
-            <div className="bg-muted/20 p-8 rounded-none">
-              <h2 className="text-lg font-light text-foreground mb-6">Payment Details</h2>
-              
-              {!paymentComplete ? (
-                <div className="space-y-6">
-                  <div>
-                    <Label htmlFor="cardholderName" className="text-sm font-light text-foreground">
-                      Cardholder Name *
-                    </Label>
-                    <Input
-                      id="cardholderName"
-                      type="text"
-                      value={paymentDetails.cardholderName}
-                      onChange={(e) => handlePaymentDetailsChange("cardholderName", e.target.value)}
-                      className="mt-2 rounded-none"
-                      placeholder="Name on card"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="cardNumber" className="text-sm font-light text-foreground">
-                      Card Number *
-                    </Label>
-                    <div className="relative mt-2">
-                      <Input
-                        id="cardNumber"
-                        type="text"
-                        value={paymentDetails.cardNumber}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/\s/g, '').replace(/(.{4})/g, '$1 ').trim();
-                          if (value.length <= 19) {
-                            handlePaymentDetailsChange("cardNumber", value);
-                          }
-                        }}
-                        className="rounded-none pl-10"
-                        placeholder="4242 4242 4242 4242"
-                        maxLength={19}
-                      />
-                      <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <RadioGroup
+                  value={shippingOption}
+                  onValueChange={setShippingOption}
+                  className="space-y-4"
+                >
+                  <div className="flex items-center justify-between p-4 border border-muted-foreground/20 rounded-none">
+                    <div className="flex items-center space-x-3">
+                      <RadioGroupItem value="standard" id="standard" />
+                      <Label htmlFor="standard" className="font-light text-foreground">
+                        Standard Shipping
+                      </Label>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Free • 3-5 business days
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center justify-between p-4 border border-muted-foreground/20 rounded-none">
+                    <div className="flex items-center space-x-3">
+                      <RadioGroupItem value="express" id="express" />
+                      <Label htmlFor="express" className="font-light text-foreground">
+                        Express Shipping
+                      </Label>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      €15 • 1-2 business days
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 border border-muted-foreground/20 rounded-none">
+                    <div className="flex items-center space-x-3">
+                      <RadioGroupItem value="overnight" id="overnight" />
+                      <Label htmlFor="overnight" className="font-light text-foreground">
+                        Overnight Delivery
+                      </Label>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      €35 • Next business day
+                    </div>
+                  </div>
+                </RadioGroup>
+              </div>
+
+              {/* Payment Section */}
+              <div className="bg-muted/20 p-8 rounded-none">
+                <h2 className="text-lg font-light text-foreground mb-6">Payment Details</h2>
+
+                {!paymentComplete ? (
+                  <div className="space-y-6">
                     <div>
-                      <Label htmlFor="expiryDate" className="text-sm font-light text-foreground">
-                        Expiry Date *
+                      <Label htmlFor="cardholderName" className="text-sm font-light text-foreground">
+                        Cardholder Name *
                       </Label>
                       <Input
-                        id="expiryDate"
+                        id="cardholderName"
                         type="text"
-                        value={paymentDetails.expiryDate}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/\D/g, '').replace(/(\d{2})(\d{2})/, '$1/$2');
-                          if (value.length <= 5) {
-                            handlePaymentDetailsChange("expiryDate", value);
-                          }
-                        }}
+                        value={paymentDetails.cardholderName}
+                        onChange={(e) => handlePaymentDetailsChange("cardholderName", e.target.value)}
                         className="mt-2 rounded-none"
-                        placeholder="MM/YY"
-                        maxLength={5}
+                        placeholder="Name on card"
                       />
                     </div>
+
                     <div>
-                      <Label htmlFor="cvv" className="text-sm font-light text-foreground">
-                        CVV *
+                      <Label htmlFor="cardNumber" className="text-sm font-light text-foreground">
+                        Card Number *
                       </Label>
-                      <Input
-                        id="cvv"
-                        type="text"
-                        value={paymentDetails.cvv}
-                        onChange={(e) => {
-                          const value = e.target.value.replace(/\D/g, '');
-                          if (value.length <= 3) {
-                            handlePaymentDetailsChange("cvv", value);
-                          }
-                        }}
-                        className="mt-2 rounded-none"
-                        placeholder="123"
-                        maxLength={3}
-                      />
+                      <div className="relative mt-2">
+                        <Input
+                          id="cardNumber"
+                          type="text"
+                          value={paymentDetails.cardNumber}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\s/g, '').replace(/(.{4})/g, '$1 ').trim();
+                            if (value.length <= 19) {
+                              handlePaymentDetailsChange("cardNumber", value);
+                            }
+                          }}
+                          className="rounded-none pl-10"
+                          placeholder="4242 4242 4242 4242"
+                          maxLength={19}
+                        />
+                        <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Order Total Summary */}
-                  <div className="bg-muted/10 p-6 rounded-none border border-muted-foreground/20 space-y-3">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Subtotal</span>
-                      <span className="text-foreground">€{subtotal.toLocaleString()}</span>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="expiryDate" className="text-sm font-light text-foreground">
+                          Expiry Date *
+                        </Label>
+                        <Input
+                          id="expiryDate"
+                          type="text"
+                          value={paymentDetails.expiryDate}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, '').replace(/(\d{2})(\d{2})/, '$1/$2');
+                            if (value.length <= 5) {
+                              handlePaymentDetailsChange("expiryDate", value);
+                            }
+                          }}
+                          className="mt-2 rounded-none"
+                          placeholder="MM/YY"
+                          maxLength={5}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="cvv" className="text-sm font-light text-foreground">
+                          CVV *
+                        </Label>
+                        <Input
+                          id="cvv"
+                          type="text"
+                          value={paymentDetails.cvv}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, '');
+                            if (value.length <= 3) {
+                              handlePaymentDetailsChange("cvv", value);
+                            }
+                          }}
+                          className="mt-2 rounded-none"
+                          placeholder="123"
+                          maxLength={3}
+                        />
+                      </div>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Shipping</span>
-                      <span className="text-foreground">
-                        {shipping === 0 ? "Free" : `€${shipping}`}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-lg font-medium border-t border-muted-foreground/20 pt-3">
-                      <span className="text-foreground">Total</span>
-                      <span className="text-foreground">€{total.toLocaleString()}</span>
-                    </div>
-                  </div>
 
-                  <Button
-                    onClick={handleCompleteOrder}
-                    disabled={isProcessing || !paymentDetails.cardNumber || !paymentDetails.expiryDate || !paymentDetails.cvv || !paymentDetails.cardholderName}
-                    className="w-full rounded-none h-12 text-base"
-                  >
-                    {isProcessing ? "Processing..." : `Complete Order • €${total.toLocaleString()}`}
-                  </Button>
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                    <Check className="h-8 w-8 text-green-600" />
+                    {/* Order Total Summary */}
+                    <div className="bg-muted/10 p-6 rounded-none border border-muted-foreground/20 space-y-3">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Subtotal</span>
+                        <span className="text-foreground">€{subtotal.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Shipping</span>
+                        <span className="text-foreground">
+                          {shipping === 0 ? "Free" : `€${shipping}`}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-lg font-medium border-t border-muted-foreground/20 pt-3">
+                        <span className="text-foreground">Total</span>
+                        <span className="text-foreground">€{total.toLocaleString()}</span>
+                      </div>
+                    </div>
+
+                    <Button
+                      onClick={handleCompleteOrder}
+                      disabled={isProcessing || !paymentDetails.cardNumber || !paymentDetails.expiryDate || !paymentDetails.cvv || !paymentDetails.cardholderName}
+                      className="w-full rounded-none h-12 text-base"
+                    >
+                      {isProcessing ? "Processing..." : `Complete Order • €${total.toLocaleString()}`}
+                    </Button>
                   </div>
-                  <h3 className="text-xl font-light text-foreground mb-2">Order Complete!</h3>
-                  <p className="text-muted-foreground">Thank you for your purchase. Your order confirmation has been sent to your email.</p>
-                 </div>
-               )}
-             </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                      <Check className="h-8 w-8 text-green-600" />
+                    </div>
+                    <h3 className="text-xl font-light text-foreground mb-2">Order Complete!</h3>
+                    <p className="text-muted-foreground">Thank you for your purchase. Your order confirmation has been sent to your email.</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
