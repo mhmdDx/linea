@@ -144,9 +144,9 @@ const ShoppingBag = ({ onViewFavorites }: ShoppingBagProps) => {
                     className="w-full rounded-none"
                     size="lg"
                   >
-                    <a href={checkoutUrl}>
+                    <Link to="/checkout" onClick={() => setCartOpen(false)}>
                       Proceed to Checkout
-                    </a>
+                    </Link>
                   </Button>
                 )}
 

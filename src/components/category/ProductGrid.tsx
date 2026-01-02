@@ -26,14 +26,23 @@ const ProductGrid = ({ categoryHandle, filters, sortBy, onProductCountChange }: 
         // If specific category and not a general "shop" or "new-in" page that might need special logic
         // For simplicity, assuming "shop" means all products for now, or handle it differently if needed.
         if (categoryHandle && categoryHandle !== 'shop' && categoryHandle !== 'new-in') {
+          const lowerHandle = categoryHandle.toLowerCase();
           // First try to get by collection handle
-          data = await getProductsByCollection(categoryHandle);
+          data = await getProductsByCollection(lowerHandle);
 
           // If no products found via collection, try searching by title
           if (!data || data.length === 0) {
             // Search by title containing the category name (e.g., "bracelet" matches "Golden Halo Bracelet")
-            // Remove the 's' at the end for singular form matching
-            const singular = categoryHandle.endsWith('s') ? categoryHandle.slice(0, -1) : categoryHandle;
+            // Handle specific plural cases like "watches" -> "watch" instead of "watche"
+            let singular = lowerHandle;
+            if (lowerHandle === 'watches') {
+              singular = 'watch';
+            } else if (lowerHandle === 'anklets') {
+              singular = 'ankle';
+            } else if (lowerHandle.endsWith('s')) {
+              singular = lowerHandle.slice(0, -1);
+            }
+
             data = await getProductsByQuery(`title:*${singular}*`);
           }
         } else {

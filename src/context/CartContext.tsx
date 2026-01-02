@@ -10,6 +10,7 @@ interface CartContextType {
     removeItem: (lineId: string) => Promise<void>;
     updateItem: (lineId: string, quantity: number) => Promise<void>;
     checkoutUrl: string | null;
+    clearCart: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -68,8 +69,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         setCheckoutUrl(newCart.checkoutUrl);
     };
 
+    const clearCart = () => {
+        setCart(null);
+        setCheckoutUrl(null);
+        localStorage.removeItem('shopifyRequestCartId');
+    };
+
     return (
-        <CartContext.Provider value={{ cart, cartOpen, setCartOpen, addItem, removeItem, updateItem, checkoutUrl }}>
+        <CartContext.Provider value={{ cart, cartOpen, setCartOpen, addItem, removeItem, updateItem, checkoutUrl, clearCart }}>
             {children}
         </CartContext.Provider>
     );

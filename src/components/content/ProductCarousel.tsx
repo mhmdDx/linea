@@ -8,7 +8,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getAllProducts } from "@/lib/shopify";
+import { getNewArrivals } from "@/lib/shopify";
 import { Skeleton } from "@/components/ui/skeleton";
 import Autoplay from "embla-carousel-autoplay";
 import FadeIn from "@/components/animations/FadeIn";
@@ -19,7 +19,7 @@ const ProductCarousel = () => {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    getAllProducts()
+    getNewArrivals()
       .then((data) => {
         setProducts(data);
         setLoading(false);
