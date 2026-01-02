@@ -43,9 +43,15 @@ const Checkout = () => {
   const handleCompleteOrder = async () => {
     // Validation
     if (!email) {
-      toast.error("Please enter your email or phone number");
+      toast.error("Please enter your email");
       return;
     }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
     if (!lastName || !address || !city) {
       toast.error("Please fill in all required delivery fields");
       return;
@@ -85,7 +91,7 @@ const Checkout = () => {
       };
 
       const orderPayload = {
-        email,
+        email: email.trim(),
         lineItems,
         shippingAddress,
         paymentMethod,
@@ -269,8 +275,8 @@ const Checkout = () => {
                 </div>
                 <div className="space-y-4">
                   <FloatingLabelInput
-                    type="text"
-                    label="Email or mobile phone number"
+                    type="email"
+                    label="Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
