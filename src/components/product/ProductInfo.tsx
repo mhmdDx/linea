@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,44 +15,96 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Minus, Plus } from "lucide-react";
+import { Minus, Plus, Check } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-const ProductInfo = ({ product }: { product: any }) => {
+const ProductInfo = ({ product, onVariantChange }: { product: any, onVariantChange?: (variant: any) => void }) => {
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
   const [adding, setAdding] = useState(false);
+
+  // Initialize with options from the first variant or defaults
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+  const [selectedVariant, setSelectedVariant] = useState<any>(null);
+
+  // Track the current product ID to prevent unnecessary resets
+  const [currentProductId, setCurrentProductId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (product && product.variants?.edges?.length > 0 && product.id !== currentProductId) {
+      setCurrentProductId(product.id);
+
+      // Default to the first variant
+      const defaultVariant = product.variants.edges[0].node;
+      setSelectedVariant(defaultVariant);
+
+      const initialOptions: Record<string, string> = {};
+      defaultVariant.selectedOptions.forEach((opt: any) => {
+        initialOptions[opt.name] = opt.value;
+      });
+      setSelectedOptions(initialOptions);
+
+      // Notify parent of initial variant
+      if (onVariantChange) {
+        onVariantChange(defaultVariant);
+      }
+    }
+  }, [product, onVariantChange, currentProductId]);
+
+  const handleOptionChange = (name: string, value: string) => {
+    const newOptions = { ...selectedOptions, [name]: value };
+    setSelectedOptions(newOptions);
+
+    // Find matching variant
+    const variant = product.variants.edges.find((edge: any) => {
+      return edge.node.selectedOptions.every((opt: any) => newOptions[opt.name] === opt.value);
+    });
+
+    if (variant) {
+      setSelectedVariant(variant.node);
+      if (onVariantChange) {
+        onVariantChange(variant.node);
+      }
+    } else {
+      // Optional: Handle case where variant doesn't exist (though usually it should if options are derived correctly)
+      setSelectedVariant(null);
+    }
+  };
 
   const incrementQuantity = () => setQuantity(prev => prev + 1);
   const decrementQuantity = () => setQuantity(prev => Math.max(1, prev - 1));
 
   const handleAddToCart = async () => {
-    if (!product) return;
+    if (!selectedVariant) return;
     setAdding(true);
-    // Use first variant
-    const variantId = product.variants.edges[0].node.id;
-    await addItem(variantId, quantity);
+    await addItem(selectedVariant.id, quantity);
     setAdding(false);
   };
 
-  if (!product) return null;
+  if (!product || !selectedVariant) return null;
 
-  // Get price from first variant
-  const variant = product.variants.edges[0].node;
-  const currentPrice = parseFloat(variant.price.amount);
-  const comparePrice = variant.compareAtPrice ? parseFloat(variant.compareAtPrice.amount) : null;
+  const currentPrice = parseFloat(selectedVariant.price.amount);
+  const comparePrice = selectedVariant.compareAtPrice ? parseFloat(selectedVariant.compareAtPrice.amount) : null;
   const isOnSale = comparePrice && comparePrice > currentPrice;
 
   const formattedPrice = currentPrice.toLocaleString('en-EU', {
     style: 'currency',
-    currency: variant.price.currencyCode,
+    currency: selectedVariant.price.currencyCode,
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   });
 
   const formattedComparePrice = comparePrice ? comparePrice.toLocaleString('en-EU', {
     style: 'currency',
-    currency: variant.price.currencyCode,
+    currency: selectedVariant.price.currencyCode,
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }) : null;
@@ -102,6 +154,39 @@ const ProductInfo = ({ product }: { product: any }) => {
 
       <div className="h-px w-full bg-border/50" />
 
+      {/* Product Options */}
+      <div className="space-y-6">
+        {product.options?.map((option: any) => {
+          // Skip the default "Title" option for single-variant products
+          if (option.name === "Title" && option.values.includes("Default Title")) {
+            return null;
+          }
+
+          return (
+            <div key={option.name} className="space-y-3">
+              <label className="text-sm font-medium text-foreground">
+                {option.name}
+              </label>
+              <Select
+                value={selectedOptions[option.name]}
+                onValueChange={(value) => handleOptionChange(option.name, value)}
+              >
+                <SelectTrigger className="w-full h-12 border-border border-2 rounded-md bg-background hover:bg-background/90 transition-colors focus:ring-1 focus:ring-foreground">
+                  <SelectValue placeholder={`Select ${option.name}`} />
+                </SelectTrigger>
+                <SelectContent>
+                  {option.values.map((value: string) => (
+                    <SelectItem key={value} value={value} className="cursor-pointer">
+                      {value}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          );
+        })}
+      </div>
+
       {/* Quantity and Add to Cart */}
       <div className="space-y-6 pt-2">
         <div className="flex items-center gap-6">
@@ -132,9 +217,9 @@ const ProductInfo = ({ product }: { product: any }) => {
         <Button
           className="w-full h-14 bg-foreground text-background hover:bg-foreground/90 text-sm uppercase tracking-[0.2em] rounded-none transition-all duration-300"
           onClick={handleAddToCart}
-          disabled={adding}
+          disabled={adding || !selectedVariant}
         >
-          {adding ? 'Adding to Bag...' : 'Add to Bag'}
+          {adding ? 'Adding to Bag...' : (selectedVariant ? 'Add to Bag' : 'Unavailable')}
         </Button>
       </div>
 

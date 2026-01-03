@@ -1,16 +1,23 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import ImageZoom from "./ImageZoom";
 
 interface ProductImageGalleryProps {
   images?: string[];
+  selectedImage?: string | null;
 }
 
-const ProductImageGallery = ({ images = [] }: ProductImageGalleryProps) => {
+const ProductImageGallery = ({ images = [], selectedImage }: ProductImageGalleryProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
   const [zoomInitialIndex, setZoomInitialIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (selectedImage && images.includes(selectedImage)) {
+      setCurrentImageIndex(images.indexOf(selectedImage));
+    }
+  }, [selectedImage, images]);
 
   // Fallback if no images
   if (!images || images.length === 0) return (

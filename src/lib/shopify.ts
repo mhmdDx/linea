@@ -143,43 +143,55 @@ export async function getNewArrivals() {
 export async function getProductByHandle(handle: string) {
   const query = `
     query getProduct($handle: String!) {
-      product(handle: $handle) {
-        id
-        handle
-        title
-        description
-        descriptionHtml
-        priceRange {
-          minVariantPrice {
-            amount
-            currencyCode
-          }
-        }
-        images(first: 5) {
-          edges {
-            node {
-              url
-              altText
-            }
-          }
-        }
-         variants(first: 10) {
-          edges {
-            node {
-              id
-              title
-              price {
-                amount
-                currencyCode
-              }
-              compareAtPrice {
-                amount
-                currencyCode
-              }
-            }
-          }
-        }
-      }
+        product(handle: $handle) {
+         id
+         handle
+         title
+         description
+         descriptionHtml
+         options {
+           name
+           values
+         }
+         priceRange {
+           minVariantPrice {
+             amount
+             currencyCode
+           }
+         }
+         images(first: 5) {
+           edges {
+             node {
+               url
+               altText
+             }
+           }
+         }
+         variants(first: 20) {
+           edges {
+             node {
+               id
+               title
+               selectedOptions {
+                 name
+                 value
+               }
+               image {
+                 url
+                 altText
+               }
+               price {
+                 amount
+                 currencyCode
+               }
+               compareAtPrice {
+                 amount
+                 currencyCode
+               }
+             }
+           }
+         }
+       }
     }`;
 
   const response = await ShopifyData(query, { handle });

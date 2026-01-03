@@ -14,12 +14,13 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { getProductByHandle } from "@/lib/shopify";
 
 const ProductDetail = () => {
   const { handle } = useParams();
   const [product, setProduct] = useState<any>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (handle) {
@@ -27,9 +28,27 @@ const ProductDetail = () => {
     }
   }, [handle]);
 
-  if (!product) return <div>Loading...</div>;
+  // Collect all unique images from product and variants
+  const images = useMemo(() => {
+    if (!product) return [];
 
-  const images = product.images.edges.map((edge: any) => edge.node.url);
+    const productImages = product.images?.edges?.map((edge: any) => edge.node.url) || [];
+    const variantImages = product.variants?.edges
+      ?.map((edge: any) => edge.node.image?.url)
+      .filter((url: string | undefined) => url !== undefined) || [];
+
+    // Merge and deduplicate images
+    const allImages = Array.from(new Set([...productImages, ...variantImages]));
+    return allImages.length > 0 ? allImages : productImages;
+  }, [product]);
+
+  const handleVariantChange = useCallback((variant: any) => {
+    if (variant && variant.image && variant.image.url) {
+      setSelectedImage(variant.image.url);
+    }
+  }, []);
+
+  if (!product) return <div>Loading...</div>;
 
   return (
     <div className="min-h-screen bg-background">
@@ -61,10 +80,13 @@ const ProductDetail = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
-            <ProductImageGallery images={images} />
+            <ProductImageGallery
+              images={selectedImage ? [selectedImage] : images}
+              selectedImage={selectedImage}
+            />
 
             <div className="lg:pl-20 mt-8 lg:mt-0 lg:sticky lg:top-6 lg:h-fit px-6 lg:px-0">
-              <ProductInfo product={product} />
+              <ProductInfo product={product} onVariantChange={handleVariantChange} />
               {/* <ProductDescription description={product.descriptionHtml} /> */}
             </div>
           </div>
