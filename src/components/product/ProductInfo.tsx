@@ -15,8 +15,9 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Minus, Plus, Check } from "lucide-react";
+import { Minus, Plus, Heart } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useFavorites } from "@/context/FavoritesContext";
 import { cn } from "@/lib/utils";
 import {
   Select,
@@ -29,6 +30,7 @@ import {
 const ProductInfo = ({ product, onVariantChange }: { product: any, onVariantChange?: (variant: any) => void }) => {
   const [quantity, setQuantity] = useState(1);
   const { addItem } = useCart();
+  const { toggleFavorite, isFavorite } = useFavorites();
   const [adding, setAdding] = useState(false);
 
   // Initialize with options from the first variant or defaults
@@ -137,7 +139,25 @@ const ProductInfo = ({ product, onVariantChange }: { product: any, onVariantChan
 
       {/* Product title and price */}
       <div className="space-y-4">
-        <h1 className="text-3xl md:text-5xl font-heading text-foreground leading-tight">{product.title}</h1>
+        <div className="flex justify-between items-start">
+          <h1 className="text-3xl md:text-5xl font-heading text-foreground leading-tight">{product.title}</h1>
+          <button
+            onClick={() => toggleFavorite({
+              id: product.id,
+              handle: product.handle,
+              title: product.title,
+              image: selectedVariant?.image?.url || product.images?.edges[0]?.node?.url,
+              price: selectedVariant?.price || product.priceRange?.minVariantPrice
+            })}
+            className="p-2 hover:bg-muted rounded-full transition-colors flex-shrink-0 ml-4"
+            aria-label="Toggle Favorite"
+          >
+            <Heart
+              size={24}
+              className={isFavorite(product.id) ? "fill-black" : ""}
+            />
+          </button>
+        </div>
         <div className="flex items-center gap-4">
           {isOnSale && formattedComparePrice ? (
             <>
@@ -187,6 +207,13 @@ const ProductInfo = ({ product, onVariantChange }: { product: any, onVariantChan
         })}
       </div>
 
+      {/* Low Stock Warning */}
+      {selectedVariant && selectedVariant.quantityAvailable > 0 && selectedVariant.quantityAvailable <= 3 && (
+        <div className="text-red-600 text-sm font-medium tracking-wide animate-pulse">
+          Only {selectedVariant.quantityAvailable} left in stock - order soon
+        </div>
+      )}
+
       {/* Quantity and Add to Cart */}
       <div className="space-y-6 pt-2">
         <div className="flex items-center gap-6">
@@ -215,11 +242,11 @@ const ProductInfo = ({ product, onVariantChange }: { product: any, onVariantChan
         </div>
 
         <Button
-          className="w-full h-14 bg-foreground text-background hover:bg-foreground/90 text-sm uppercase tracking-[0.2em] rounded-none transition-all duration-300"
+          className="w-full h-14 bg-foreground text-background hover:bg-foreground/90 text-sm uppercase tracking-[0.2em] rounded-none transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={handleAddToCart}
-          disabled={adding || !selectedVariant}
+          disabled={adding || !selectedVariant || !selectedVariant.availableForSale}
         >
-          {adding ? 'Adding to Bag...' : (selectedVariant ? 'Add to Bag' : 'Unavailable')}
+          {adding ? 'Adding to Bag...' : (!selectedVariant?.availableForSale ? 'Sold Out' : 'Add to Bag')}
         </Button>
       </div>
 

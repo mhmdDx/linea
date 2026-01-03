@@ -45,6 +45,11 @@ const ProductDetail = () => {
   const handleVariantChange = useCallback((variant: any) => {
     if (variant && variant.image && variant.image.url) {
       setSelectedImage(variant.image.url);
+
+      // Scroll to top on small screens (mobile/tablet) to show the new image
+      if (typeof window !== "undefined" && window.innerWidth < 1024) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
   }, []);
 

@@ -1,7 +1,9 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Link } from "react-router-dom";
-import Pagination from "./Pagination";
 import { useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
+import { Heart } from "lucide-react";
+import { useFavorites } from "@/context/FavoritesContext";
+import Pagination from "./Pagination";
 import { getAllProducts, getProductsByCollection, getProductsByQuery } from "@/lib/shopify";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { FilterState } from "./FilterSortBar";
@@ -17,15 +19,23 @@ const ProductGrid = ({ categoryHandle, filters, sortBy, onProductCountChange }: 
   const [products, setProducts] = useState<any[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get('q');
+  const { toggleFavorite, isFavorite } = useFavorites();
 
   useEffect(() => {
     setLoading(true);
     const fetchProducts = async () => {
       try {
         let data;
+
+        // Handle search query
+        if (searchQuery) {
+          data = await getProductsByQuery(searchQuery);
+        }
         // If specific category and not a general "shop" or "new-in" page that might need special logic
         // For simplicity, assuming "shop" means all products for now, or handle it differently if needed.
-        if (categoryHandle && categoryHandle !== 'shop' && categoryHandle !== 'new-in') {
+        else if (categoryHandle && categoryHandle !== 'shop' && categoryHandle !== 'new-in') {
           const lowerHandle = categoryHandle.toLowerCase();
           // First try to get by collection handle
           data = await getProductsByCollection(lowerHandle);
@@ -43,6 +53,8 @@ const ProductGrid = ({ categoryHandle, filters, sortBy, onProductCountChange }: 
               singular = lowerHandle.slice(0, -1);
             }
 
+            // Note: Since we are using similar function for explicit search,
+            // this fallback logic for categories is effectively an implicit search.
             data = await getProductsByQuery(`title:*${singular}*`);
           }
         } else {
@@ -57,7 +69,7 @@ const ProductGrid = ({ categoryHandle, filters, sortBy, onProductCountChange }: 
     };
 
     fetchProducts();
-  }, [categoryHandle]);
+  }, [categoryHandle, searchQuery]);
 
   // Apply filters and sorting
   useEffect(() => {
@@ -180,64 +192,86 @@ const ProductGrid = ({ categoryHandle, filters, sortBy, onProductCountChange }: 
           }) : null;
 
           return (
-            <Link key={product.id} to={`/product/${product.handle}`}>
-              <Card
-                className="border-none shadow-none bg-transparent group cursor-pointer"
-              >
-                <CardContent className="p-0">
-                  <div className="aspect-square mb-3 overflow-hidden bg-muted/10 relative">
-                    {image ? (
-                      <img
-                        src={image}
-                        alt={product.title}
-                        className={`w-full h-full object-cover transition-all duration-500 ${hoverImage ? 'group-hover:opacity-0' : 'group-hover:scale-105'}`}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-100 text-muted-foreground text-xs">No Image</div>
-                    )}
+            <div key={product.id} className="group relative">
+              <Link to={`/product/${product.handle}`}>
+                <Card
+                  className="border-none shadow-none bg-transparent group cursor-pointer"
+                >
+                  <CardContent className="p-0">
+                    <div className="aspect-square mb-3 overflow-hidden bg-muted/10 relative">
+                      {image ? (
+                        <img
+                          src={image}
+                          alt={product.title}
+                          className={`w-full h-full object-cover transition-all duration-500 ${hoverImage ? 'group-hover:opacity-0' : 'group-hover:scale-105'}`}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-100 text-muted-foreground text-xs">No Image</div>
+                      )}
 
-                    {hoverImage && (
-                      <img
-                        src={hoverImage}
-                        alt={`${product.title} alternate view`}
-                        className="absolute inset-0 w-full h-full object-cover transition-all duration-500 opacity-0 group-hover:opacity-100"
-                      />
-                    )}
+                      {hoverImage && (
+                        <img
+                          src={hoverImage}
+                          alt={`${product.title} alternate view`}
+                          className="absolute inset-0 w-full h-full object-cover transition-all duration-500 opacity-0 group-hover:opacity-100"
+                        />
+                      )}
 
-                    <div className="absolute inset-0 bg-black/[0.03]"></div>
-                    {/* {product.availableForSale && (
-                      <div className="absolute top-2 left-2 px-2 py-1 text-xs font-medium text-black">
-                        NEW
-                      </div>
-                    )} */}
-                  </div>
-                  <div className="space-y-1">
-                    {/* <p className="text-sm font-light text-foreground">
+                      <div className="absolute inset-0 bg-black/[0.03]"></div>
+
+                      {/* Heart Icon */}
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          toggleFavorite({
+                            id: product.id,
+                            handle: product.handle,
+                            title: product.title,
+                            image: image,
+                            price: {
+                              amount: product.priceRange.minVariantPrice.amount,
+                              currencyCode: product.priceRange.minVariantPrice.currencyCode
+                            }
+                          });
+                        }}
+                        className="absolute top-2 right-2 p-2 rounded-full hover:bg-black/5 text-black transition-colors z-20"
+                      >
+                        <Heart
+                          size={20}
+                          strokeWidth={2}
+                          className={isFavorite(product.id) ? "fill-black text-black" : "text-black"}
+                        />
+                      </button>
+                    </div>
+                    <div className="space-y-1">
+                      {/* <p className="text-sm font-light text-foreground">
                        Category
                     </p> */}
-                    <h3 className="text-sm font-medium text-foreground">
-                      {product.title}
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      {isOnSale && formattedComparePrice ? (
-                        <>
-                          <p className="text-sm font-light text-muted-foreground line-through">
-                            {formattedComparePrice}
-                          </p>
+                      <h3 className="text-sm font-medium text-foreground">
+                        {product.title}
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        {isOnSale && formattedComparePrice ? (
+                          <>
+                            <p className="text-sm font-light text-muted-foreground line-through">
+                              {formattedComparePrice}
+                            </p>
+                            <p className="text-sm font-light text-foreground">
+                              {formattedPrice}
+                            </p>
+                          </>
+                        ) : (
                           <p className="text-sm font-light text-foreground">
                             {formattedPrice}
                           </p>
-                        </>
-                      ) : (
-                        <p className="text-sm font-light text-foreground">
-                          {formattedPrice}
-                        </p>
-                      )}
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
+                  </CardContent>
+                </Card>
+              </Link>
+            </div>
           )
         })}
       </div>

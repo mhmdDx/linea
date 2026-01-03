@@ -169,13 +169,15 @@ export async function getProductByHandle(handle: string) {
          }
          variants(first: 20) {
            edges {
-             node {
-               id
-               title
-               selectedOptions {
-                 name
-                 value
-               }
+              node {
+                id
+                title
+                availableForSale
+                quantityAvailable
+                selectedOptions {
+                  name
+                  value
+                }
                image {
                  url
                  altText

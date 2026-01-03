@@ -1,10 +1,11 @@
 import { ArrowRight, X, Minus, Plus, User } from "lucide-react";
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import ShoppingBag from "./ShoppingBag";
 import { useCart } from "@/context/CartContext";
+import { useFavorites } from "@/context/FavoritesContext";
 
 const Navigation = () => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -13,6 +14,7 @@ const Navigation = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const { cart, cartOpen, setCartOpen } = useCart();
+  const { favorites, removeFromFavorites } = useFavorites();
 
   const totalItems = cart?.lines?.edges?.reduce((sum: number, edge: any) => sum + edge.node.quantity, 0) || 0;
 
@@ -88,6 +90,24 @@ const Navigation = () => {
     if (contactSection) {
       contactSection.scrollIntoView({ behavior: 'smooth' });
     }
+  };
+
+  /* Search Logic */
+  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
+
+  const handleSearch = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (searchQuery.trim()) {
+      setIsSearchOpen(false);
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
+  const handlePopularSearch = (term: string) => {
+    setIsSearchOpen(false);
+    setSearchQuery(term);
+    navigate(`/search?q=${encodeURIComponent(term)}`);
   };
 
   return (
@@ -276,7 +296,7 @@ const Navigation = () => {
             <div className="max-w-2xl mx-auto">
               {/* Search input */}
               <div className="relative mb-8">
-                <div className="flex items-center border-b border-border pb-2">
+                <form onSubmit={handleSearch} className="flex items-center border-b border-border pb-2">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-5 h-5 text-nav-foreground mr-3">
                     <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                   </svg>
@@ -285,8 +305,11 @@ const Navigation = () => {
                     placeholder="Search for jewelry..."
                     className="flex-1 bg-transparent text-nav-foreground placeholder:text-nav-foreground/60 outline-none text-lg"
                     autoFocus
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
                   />
-                </div>
+                  <button type="submit" className="hidden">Search</button>
+                </form>
               </div>
 
               {/* Popular searches */}
@@ -296,6 +319,7 @@ const Navigation = () => {
                   {popularSearches.map((search, index) => (
                     <button
                       key={index}
+                      onClick={() => handlePopularSearch(search)}
                       className="text-nav-foreground hover:text-nav-hover text-sm font-light py-2 px-4 border border-border rounded-full transition-colors duration-200 hover:border-nav-hover"
                     >
                       {search}
@@ -386,10 +410,53 @@ const Navigation = () => {
             </div>
 
             {/* Content */}
-            <div className="p-6">
-              <p className="text-muted-foreground text-sm mb-6">
-                You haven't added any favorites yet. Browse our collection and click the heart icon to save items you love.
-              </p>
+            <div className="p-6 flex-1 overflow-y-auto">
+              {favorites.length === 0 ? (
+                <p className="text-muted-foreground text-sm mb-6">
+                  You haven't added any favorites yet. Browse our collection and click the heart icon to save items you love.
+                </p>
+              ) : (
+                <div className="space-y-6">
+                  {favorites.map((item) => (
+                    <div key={item.id} className="flex gap-4">
+                      <div className="w-20 h-20 bg-muted/20 flex-shrink-0 overflow-hidden">
+                        {item.image && (
+                          <img
+                            src={item.image}
+                            alt={item.title}
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <Link
+                          to={`/product/${item.handle}`}
+                          onClick={() => setOffCanvasType(null)}
+                          className="text-sm font-medium text-foreground hover:underline block truncate"
+                        >
+                          {item.title}
+                        </Link>
+                        {item.price && (
+                          <p className="text-sm text-foreground/80 mt-1">
+                            {parseFloat(item.price.amount).toLocaleString('en-EU', {
+                              style: 'currency',
+                              currency: item.price.currencyCode,
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 0,
+                            })}
+                          </p>
+                        )}
+                        <button
+                          onClick={() => removeFromFavorites(item.id)}
+                          className="text-xs text-muted-foreground hover:text-red-500 mt-2 transition-colors"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
