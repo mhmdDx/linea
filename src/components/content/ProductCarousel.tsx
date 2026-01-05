@@ -12,11 +12,14 @@ import { getNewArrivals } from "@/lib/shopify";
 import { Skeleton } from "@/components/ui/skeleton";
 import Autoplay from "embla-carousel-autoplay";
 import FadeIn from "@/components/animations/FadeIn";
+import { useFavorites } from "@/context/FavoritesContext";
+import { Heart } from "lucide-react";
 
 const ProductCarousel = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const { toggleFavorite, isFavorite } = useFavorites();
 
   useEffect(() => {
     getNewArrivals()
@@ -132,6 +135,31 @@ const ProductCarousel = () => {
                             <div className="w-full h-full flex items-center justify-center bg-gray-100 text-xs text-muted-foreground">No Image</div>
                           )}
                           <div className="absolute inset-0 bg-black/[0.03]"></div>
+
+                          {/* Heart Icon */}
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              toggleFavorite({
+                                id: product.id,
+                                handle: product.handle,
+                                title: product.title,
+                                image: image,
+                                price: {
+                                  amount: product.priceRange.minVariantPrice.amount,
+                                  currencyCode: product.priceRange.minVariantPrice.currencyCode
+                                }
+                              });
+                            }}
+                            className="absolute top-2 right-2 p-2 rounded-full hover:bg-black/5 text-black transition-colors z-20"
+                          >
+                            <Heart
+                              size={20}
+                              strokeWidth={2}
+                              className={isFavorite(product.id) ? "fill-black text-black" : "text-black"}
+                            />
+                          </button>
                         </div>
                         <div className="space-y-1">
                           <h3 className="text-sm font-medium text-foreground">

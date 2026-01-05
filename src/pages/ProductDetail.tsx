@@ -21,6 +21,7 @@ const ProductDetail = () => {
   const { handle } = useParams();
   const [product, setProduct] = useState<any>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedVariant, setSelectedVariant] = useState<any>(null);
 
   useEffect(() => {
     if (handle) {
@@ -28,27 +29,55 @@ const ProductDetail = () => {
     }
   }, [handle]);
 
-  // Collect all unique images from product and variants
+  // Collect all unique images from product media and variants
   const images = useMemo(() => {
     if (!product) return [];
 
-    const productImages = product.images?.edges?.map((edge: any) => edge.node.url) || [];
-    const variantImages = product.variants?.edges
-      ?.map((edge: any) => edge.node.image?.url)
-      .filter((url: string | undefined) => url !== undefined) || [];
+    const productMedia = product.media?.edges?.map((edge: any) => {
+      // Prefer the image url if it's a MediaImage, otherwise fallback to previewImage
+      return edge.node.image?.url || edge.node.previewImage?.url;
+    }) || [];
 
-    // Merge and deduplicate images
-    const allImages = Array.from(new Set([...productImages, ...variantImages]));
-    return allImages.length > 0 ? allImages : productImages;
-  }, [product]);
+    const productImages = product.images?.edges?.map((edge: any) => edge.node.url) || [];
+
+    // Combine both old 'images' field (fallback) and new 'media' field
+    const mainImages = productMedia.length > 0 ? productMedia : productImages;
+
+    // Filter images: Show generic images + current variant image. Hide other variants' images.
+    if (selectedVariant) {
+      const variantImageUrls = new Set(
+        product.variants?.edges
+          ?.map((e: any) => e.node.image?.url)
+          .filter(Boolean)
+      );
+
+      const currentVariantImageUrl = selectedVariant.image?.url;
+
+      return mainImages.filter((url: string) => {
+        // Always show the current variant's image
+        if (url === currentVariantImageUrl) return true;
+
+        // If the image belongs to ANY variant (and isn't the current one), hide it
+        if (variantImageUrls.has(url)) return false;
+
+        // Otherwise, it's a generic image (detail shot, etc.), so show it
+        return true;
+      });
+    }
+
+    return mainImages;
+  }, [product, selectedVariant]);
 
   const handleVariantChange = useCallback((variant: any) => {
-    if (variant && variant.image && variant.image.url) {
-      setSelectedImage(variant.image.url);
+    if (variant) {
+      setSelectedVariant(variant);
+      if (variant.image && variant.image.url) {
+        setSelectedImage(variant.image.url);
 
-      // Scroll to top on small screens (mobile/tablet) to show the new image
-      if (typeof window !== "undefined" && window.innerWidth < 1024) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Scroll to top on small screens (mobile/tablet) to show the new image
+        if (typeof window !== "undefined" && window.innerWidth < 1024) {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
       }
     }
   }, []);
@@ -86,8 +115,9 @@ const ProductDetail = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
             <ProductImageGallery
-              images={selectedImage ? [selectedImage] : images}
+              images={images}
               selectedImage={selectedImage}
+              product={product}
             />
 
             <div className="lg:pl-20 mt-8 lg:mt-0 lg:sticky lg:top-6 lg:h-fit px-6 lg:px-0">

@@ -24,8 +24,9 @@ const RestockedSection = () => {
     useEffect(() => {
         getAllProducts()
             .then((data) => {
-                // Just take the next 4 for the "Restocked" look (avoiding duplicates from New Collection)
-                setProducts(data.slice(4, 8));
+                // Shuffle the products to show random ones each time
+                const shuffled = [...data].sort(() => 0.5 - Math.random());
+                setProducts(shuffled.slice(0, 4));
                 setLoading(false);
             })
             .catch((e) => {

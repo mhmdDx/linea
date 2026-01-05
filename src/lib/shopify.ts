@@ -6,7 +6,6 @@ export async function ShopifyData(query: string, variables = {}) {
   const URL = `https://${domain}/api/2024-01/graphql.json`;
 
   const options = {
-    endpoint: URL,
     method: "POST",
     headers: {
       "X-Shopify-Storefront-Access-Token": storefrontAccessToken,
@@ -14,6 +13,7 @@ export async function ShopifyData(query: string, variables = {}) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ query, variables }),
+    cache: "no-store" as RequestCache,
   };
 
   try {
@@ -53,7 +53,7 @@ export async function getAllProducts() {
               currencyCode
             }
           }
-          images(first: 5) {
+          images(first: 10) {
             edges {
               node {
                 url
@@ -107,7 +107,7 @@ export async function getNewArrivals() {
               currencyCode
             }
           }
-          images(first: 5) {
+          images(first: 10) {
             edges {
               node {
                 url
@@ -159,7 +159,7 @@ export async function getProductByHandle(handle: string) {
              currencyCode
            }
          }
-         images(first: 5) {
+         images(first: 50) {
            edges {
              node {
                url
@@ -491,7 +491,7 @@ export async function getProductsByCollection(handle: string) {
                   currencyCode
                 }
               }
-              images(first: 5) {
+              images(first: 10) {
                 edges {
                   node {
                     url
@@ -533,7 +533,7 @@ export async function getProductsByQuery(queryStr: string) {
                 currencyCode
               }
             }
-            images(first: 5) {
+            images(first: 10) {
               edges {
                 node {
                   url

@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Heart } from "lucide-react";
 import { useFavorites } from "@/context/FavoritesContext";
 import Pagination from "./Pagination";
-import { getAllProducts, getProductsByCollection, getProductsByQuery } from "@/lib/shopify";
+import { getAllProducts, getProductsByCollection, getProductsByQuery, getNewArrivals } from "@/lib/shopify";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { FilterState } from "./FilterSortBar";
 
@@ -33,29 +33,34 @@ const ProductGrid = ({ categoryHandle, filters, sortBy, onProductCountChange }: 
         if (searchQuery) {
           data = await getProductsByQuery(searchQuery);
         }
-        // If specific category and not a general "shop" or "new-in" page that might need special logic
-        // For simplicity, assuming "shop" means all products for now, or handle it differently if needed.
-        else if (categoryHandle && categoryHandle !== 'shop' && categoryHandle !== 'new-in') {
-          const lowerHandle = categoryHandle.toLowerCase();
-          // First try to get by collection handle
-          data = await getProductsByCollection(lowerHandle);
+        // If specific category and not a general "shop"
+        else if (categoryHandle) {
+          if (categoryHandle === 'shop') {
+            data = await getAllProducts();
+          } else if (categoryHandle === 'new-in') {
+            data = await getNewArrivals();
+          } else {
+            const lowerHandle = categoryHandle.toLowerCase();
+            // First try to get by collection handle
+            data = await getProductsByCollection(lowerHandle);
 
-          // If no products found via collection, try searching by title
-          if (!data || data.length === 0) {
-            // Search by title containing the category name (e.g., "bracelet" matches "Golden Halo Bracelet")
-            // Handle specific plural cases like "watches" -> "watch" instead of "watche"
-            let singular = lowerHandle;
-            if (lowerHandle === 'watches') {
-              singular = 'watch';
-            } else if (lowerHandle === 'anklets') {
-              singular = 'ankle';
-            } else if (lowerHandle.endsWith('s')) {
-              singular = lowerHandle.slice(0, -1);
+            // If no products found via collection, try searching by title
+            if (!data || data.length === 0) {
+              // Search by title containing the category name (e.g., "bracelet" matches "Golden Halo Bracelet")
+              // Handle specific plural cases like "watches" -> "watch" instead of "watche"
+              let singular = lowerHandle;
+              if (lowerHandle === 'watches') {
+                singular = 'watch';
+              } else if (lowerHandle === 'anklets') {
+                singular = 'ankle';
+              } else if (lowerHandle.endsWith('s')) {
+                singular = lowerHandle.slice(0, -1);
+              }
+
+              // Note: Since we are using similar function for explicit search,
+              // this fallback logic for categories is effectively an implicit search.
+              data = await getProductsByQuery(`title:*${singular}*`);
             }
-
-            // Note: Since we are using similar function for explicit search,
-            // this fallback logic for categories is effectively an implicit search.
-            data = await getProductsByQuery(`title:*${singular}*`);
           }
         } else {
           data = await getAllProducts();

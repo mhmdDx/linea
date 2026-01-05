@@ -40,9 +40,33 @@ const StatusBar = () => {
     return () => clearInterval(interval);
   }, []);
 
+  /* Scroll Logic to hide on mobile */
+  const [hideOnMobile, setHideOnMobile] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Only trigger on small screens
+      if (window.innerWidth < 1024) {
+        if (window.scrollY > 50) {
+          setHideOnMobile(true);
+        } else {
+          setHideOnMobile(false);
+        }
+      } else {
+        setHideOnMobile(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <div className="bg-black text-white py-2.5 px-4 text-xs font-medium tracking-wide">
-      <div className="container mx-auto flex flex-col sm:flex-row items-center justify-center gap-6 text-center sm:text-left">
+    <div
+      className={`bg-black text-white font-medium tracking-wide transition-all duration-300 ease-in-out overflow-hidden ${hideOnMobile ? 'max-h-0 opacity-0' : 'max-h-12 opacity-100 py-2.5'
+        }`}
+    >
+      <div className="container mx-auto flex flex-col sm:flex-row items-center justify-center gap-6 text-center sm:text-left px-4 text-xs">
 
         {/* Left Message */}
         <span>
@@ -51,7 +75,7 @@ const StatusBar = () => {
 
         {/* Center/Right Timer & Action */}
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 font-mono text-sm font-bold">
+          <div className="hidden sm:flex items-center gap-2 font-mono text-sm font-bold">
             <span>{String(timeLeft.days).padStart(2, '0')}D</span> :
             <span>{String(timeLeft.hours).padStart(2, '0')}H</span> :
             <span>{String(timeLeft.minutes).padStart(2, '0')}M</span> :

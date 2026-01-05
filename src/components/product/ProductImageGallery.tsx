@@ -1,17 +1,21 @@
 import { useState, useRef, useEffect } from "react";
 import ImageZoom from "./ImageZoom";
+import { useFavorites } from "@/context/FavoritesContext";
+import { Heart } from "lucide-react";
 
 interface ProductImageGalleryProps {
   images?: string[];
   selectedImage?: string | null;
+  product?: any;
 }
 
-const ProductImageGallery = ({ images = [], selectedImage }: ProductImageGalleryProps) => {
+const ProductImageGallery = ({ images = [], selectedImage, product }: ProductImageGalleryProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isZoomOpen, setIsZoomOpen] = useState(false);
   const [zoomInitialIndex, setZoomInitialIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
+  const { toggleFavorite, isFavorite } = useFavorites();
 
   useEffect(() => {
     if (selectedImage && images.includes(selectedImage)) {
@@ -84,11 +88,34 @@ const ProductImageGallery = ({ images = [], selectedImage }: ProductImageGallery
             />
 
             {/* Zoom Hint */}
-            <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-sm">
+            <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-sm z-10">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-700">
                 <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" /><line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" />
               </svg>
             </div>
+
+            {/* Heart Icon */}
+            {product && (
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toggleFavorite({
+                    id: product.id,
+                    handle: product.handle,
+                    title: product.title,
+                    image: images[currentImageIndex],
+                    price: product.priceRange?.minVariantPrice || { amount: "0", currencyCode: "EGP" }
+                  });
+                }}
+                className="absolute top-4 left-4 p-2 rounded-full bg-white/90 backdrop-blur-sm hover:bg-white text-black transition-all shadow-sm z-20"
+              >
+                <Heart
+                  size={20}
+                  className={isFavorite(product.id) ? "fill-black text-black" : "text-black"}
+                />
+              </button>
+            )}
           </div>
 
           {/* Thumbnails */}
@@ -130,7 +157,7 @@ const ProductImageGallery = ({ images = [], selectedImage }: ProductImageGallery
               />
 
               {/* Zoom Icon Indicator */}
-              <div className="absolute top-4 left-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md">
+              <div className="absolute top-4 left-16 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md pointer-events-none">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -149,6 +176,29 @@ const ProductImageGallery = ({ images = [], selectedImage }: ProductImageGallery
                   <line x1="8" y1="11" x2="14" y2="11" />
                 </svg>
               </div>
+
+              {/* Heart Icon Mobile */}
+              {product && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleFavorite({
+                      id: product.id,
+                      handle: product.handle,
+                      title: product.title,
+                      image: images[currentImageIndex],
+                      price: product.priceRange?.minVariantPrice || { amount: "0", currencyCode: "EGP" }
+                    });
+                  }}
+                  className="absolute top-4 left-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md z-20"
+                >
+                  <Heart
+                    size={20}
+                    className={isFavorite(product.id) ? "fill-black text-black" : "text-black"}
+                  />
+                </button>
+              )}
             </div>
           </div>
 

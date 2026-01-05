@@ -48,13 +48,13 @@ const Navigation = () => {
       name: "Shop",
       href: "/category/shop",
       submenuItems: [
-        "Rings",
-        "Necklaces",
-        "Earrings",
-        "Bracelets",
-        "Watches",
-        "Anklets",
-        "Belts"
+        { label: "Rings", href: "/category/rings" },
+        { label: "Necklaces", href: "/category/necklaces" },
+        { label: "Earrings", href: "/category/earrings" },
+        { label: "Bracelets", href: "/category/bracelets" },
+        { label: "Watches", href: "/category/watches" },
+        { label: "Anklets", href: "/category/anklets" },
+        { label: "Belts", href: "/category/belts" }
       ],
       images: [
         { src: "/rings-collection.png", alt: "Rings Collection", label: "Rings" },
@@ -64,17 +64,8 @@ const Navigation = () => {
     {
       name: "New in",
       href: "/category/new-in",
-      submenuItems: [
-        "This Week's Arrivals",
-        "Spring Collection",
-        "Featured Designers",
-        "Limited Edition",
-        "Pre-Orders"
-      ],
-      images: [
-        { src: "/arcus-bracelet.png", alt: "Arcus Bracelet", label: "Arcus Bracelet" },
-        { src: "/span-bracelet.png", alt: "Span Bracelet", label: "Span Bracelet" }
-      ]
+      submenuItems: [],
+      images: []
     },
     {
       name: "Contact",
@@ -238,10 +229,10 @@ const Navigation = () => {
                     ?.submenuItems.map((subItem, index) => (
                       <li key={index}>
                         <Link
-                          to={activeDropdown === "About" ? `/about/${subItem.toLowerCase().replace(/\s+/g, '-')}` : `/category/${subItem.toLowerCase()}`}
+                          to={subItem.href}
                           className="text-nav-foreground hover:text-nav-hover transition-colors duration-200 text-sm font-light block py-2"
                         >
-                          {subItem}
+                          {subItem.label}
                         </Link>
                       </li>
                     ))}
@@ -363,11 +354,11 @@ const Navigation = () => {
                     {item.submenuItems.map((subItem, subIndex) => (
                       <Link
                         key={subIndex}
-                        to={item.name === "About" ? `/about/${subItem.toLowerCase().replace(/\s+/g, '-')}` : `/category/${subItem.toLowerCase()}`}
+                        to={subItem.href}
                         className="text-nav-foreground/70 hover:text-nav-hover text-sm font-light block py-1"
                         onClick={() => setIsMobileMenuOpen(false)}
                       >
-                        {subItem}
+                        {subItem.label}
                       </Link>
                     ))}
                   </div>
