@@ -27,6 +27,7 @@ interface OrderRequest {
     lineItems: LineItem[];
     shippingAddress: ShippingAddress;
     customerId?: string;
+    shippingCost?: number;
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -40,7 +41,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log('Creating order with token:', ADMIN_ACCESS_TOKEN ? 'Token exists' : 'Token missing');
 
     try {
-        const { email, lineItems, shippingAddress, customerId }: OrderRequest = req.body;
+        const { email, lineItems, shippingAddress, customerId, shippingCost }: OrderRequest = req.body;
 
         // Validate required fields
         if (!email || !lineItems || !shippingAddress) {
@@ -96,6 +97,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 },
                 note: 'Order placed via custom checkout',
                 tags: 'custom-checkout',
+                shipping_line: {
+                    title: 'Standard Shipping',
+                    price: shippingCost ? shippingCost.toString() : '0.00',
+                }
             },
         };
 

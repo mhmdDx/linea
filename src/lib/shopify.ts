@@ -646,6 +646,30 @@ export async function createCustomer(email: string, password: string, firstName:
   return response.data.customerCreate;
 }
 
+export async function renewCustomerAccessToken(accessToken: string) {
+  const query = `
+    mutation customerAccessTokenRenew($customerAccessToken: String!) {
+      customerAccessTokenRenew(customerAccessToken: $customerAccessToken) {
+        customerAccessToken {
+          accessToken
+          expiresAt
+        }
+        userErrors {
+          field
+          message
+        }
+      }
+    }
+  `;
+
+  const variables = {
+    customerAccessToken: accessToken
+  };
+
+  const response = await ShopifyData(query, variables);
+  return response.data.customerAccessTokenRenew?.customerAccessToken;
+}
+
 export async function getCustomer(accessToken: string) {
   const query = `
     query customer($customerAccessToken: String!) {

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { getCustomer } from '../lib/shopify';
+import { getCustomer, renewCustomerAccessToken } from '../lib/shopify';
 
 interface User {
     id: string;
@@ -29,8 +29,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (customer) {
                 setUser(customer);
             } else {
-                // Token invalid or user not found
-                logout();
+                // Token invalid or user not found, try to renew
+                try {
+                    console.log('Token invalid, attempting renewal...');
+                    const newSession = await renewCustomerAccessToken(accessToken);
+                    if (newSession?.accessToken) {
+                        console.log('Token renewed successfully');
+                        localStorage.setItem('shopifyCustomerAccessToken', newSession.accessToken);
+                        localStorage.setItem('shopifyCustomerAccessTokenExpiresAt', newSession.expiresAt);
+
+                        // Retry with new token
+                        const newCustomer = await getCustomer(newSession.accessToken);
+                        if (newCustomer) {
+                            setUser(newCustomer);
+                        } else {
+                            logout();
+                        }
+                    } else {
+                        logout();
+                    }
+                } catch (renewError) {
+                    console.error("Token renewal failed", renewError);
+                    logout();
+                }
             }
         } catch (error) {
             console.error("Failed to fetch user", error);

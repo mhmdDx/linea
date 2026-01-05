@@ -37,7 +37,15 @@ const Checkout = () => {
   const cartItems = cart?.lines?.edges?.map((edge: any) => edge.node) || [];
   const subtotal = cart?.cost?.totalAmount?.amount ? parseFloat(cart.cost.totalAmount.amount) : 0;
   const currencyCode = cart?.cost?.totalAmount?.currencyCode || 'EGP';
-  const shipping = 0; // Free shipping
+  // Shipping Logic
+  const getShippingCost = (gov: string) => {
+    const upperEgypt = ["Aswan", "Luxor", "Qena", "Sohag", "Asyut", "Minya", "Beni Suef", "Faiyum", "Red Sea"];
+    if (gov === "Alexandria") return 70;
+    if (upperEgypt.includes(gov)) return 120;
+    return 80;
+  };
+
+  const shipping = getShippingCost(governorate);
   const total = subtotal + shipping;
 
   const handleCompleteOrder = async () => {
@@ -52,8 +60,13 @@ const Checkout = () => {
       return;
     }
 
-    if (!lastName || !address || !city) {
+    if (!lastName || !address || !city || !phone) {
       toast.error("Please fill in all required delivery fields");
+      return;
+    }
+
+    if (phone.length < 11) {
+      toast.error("Please enter a valid phone number");
       return;
     }
 
@@ -96,6 +109,7 @@ const Checkout = () => {
         shippingAddress,
         paymentMethod,
         financialStatus: 'pending',
+        shippingCost: shipping,
         customerId: user?.id // Pass the customer ID if logged in
       };
 
@@ -280,18 +294,7 @@ const Checkout = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
-                  <div className="flex items-start gap-2">
-                    <input
-                      type="checkbox"
-                      id="emailOffers"
-                      checked={emailOffers}
-                      onChange={(e) => setEmailOffers(e.target.checked)}
-                      className="mt-1 h-4 w-4 rounded-sm border-gray-300 text-black focus:ring-black cursor-pointer"
-                    />
-                    <label htmlFor="emailOffers" className="text-sm text-gray-600 cursor-pointer select-none">
-                      Email me with news and offers
-                    </label>
-                  </div>
+
                 </div>
               </section>
 
@@ -299,30 +302,13 @@ const Checkout = () => {
               <section>
                 <h2 className="text-lg font-medium tracking-tight text-black mb-4">Delivery</h2>
                 <div className="space-y-3">
-                  {/* Country/Region */}
-                  <div className="relative">
-                    <label className="absolute top-1.5 left-3 text-[11px] font-medium text-gray-500 z-10 pointer-events-none">Country/Region</label>
-                    <select
-                      value={country}
-                      onChange={(e) => setCountry(e.target.value)}
-                      className="w-full h-[50px] px-3 pt-4 pb-1 rounded-md border border-gray-300 bg-white focus:border-black focus:ring-black/5 outline-none appearance-none text-sm shadow-sm transition-all"
-                    >
-                      <option value="EG">Egypt</option>
-                      <option value="SA">Saudi Arabia</option>
-                      <option value="AE">United Arab Emirates</option>
-                      <option value="US">United States</option>
-                      <option value="GB">United Kingdom</option>
-                    </select>
-                    <div className="absolute right-4 top-1/2 -translate-y-1/3 pointer-events-none">
-                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
-                    </div>
-                  </div>
+
 
                   {/* First Name & Last Name */}
                   <div className="grid grid-cols-2 gap-3">
                     <FloatingLabelInput
                       type="text"
-                      label="First name (optional)"
+                      label="First name"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
                     />
@@ -368,8 +354,30 @@ const Checkout = () => {
                         <option value="Alexandria">Alexandria</option>
                         <option value="Cairo">Cairo</option>
                         <option value="Giza">Giza</option>
-                        <option value="Aswan">Aswan</option>
+                        <option value="Qalyubia">Qalyubia</option>
+                        <option value="Dakahlia">Dakahlia</option>
+                        <option value="Sharqia">Sharqia</option>
+                        <option value="Gharbia">Gharbia</option>
+                        <option value="Kafr El Sheikh">Kafr El Sheikh</option>
+                        <option value="Beheira">Beheira</option>
+                        <option value="Damietta">Damietta</option>
+                        <option value="Port Said">Port Said</option>
+                        <option value="Ismailia">Ismailia</option>
+                        <option value="Suez">Suez</option>
+                        <option value="Monufia">Monufia</option>
+                        <option value="Faiyum">Faiyum</option>
+                        <option value="Beni Suef">Beni Suef</option>
+                        <option value="Minya">Minya</option>
+                        <option value="Asyut">Asyut</option>
+                        <option value="Sohag">Sohag</option>
+                        <option value="Qena">Qena</option>
                         <option value="Luxor">Luxor</option>
+                        <option value="Aswan">Aswan</option>
+                        <option value="Red Sea">Red Sea</option>
+                        <option value="New Valley">New Valley</option>
+                        <option value="Matrouh">Matrouh</option>
+                        <option value="North Sinai">North Sinai</option>
+                        <option value="South Sinai">South Sinai</option>
                       </select>
                       <div className="absolute right-2 top-1/2 -translate-y-1/3 pointer-events-none">
                         <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -377,7 +385,7 @@ const Checkout = () => {
                     </div>
                     <FloatingLabelInput
                       type="text"
-                      label="Postal code (optional)"
+                      label="Postal code"
                       value={postalCode}
                       onChange={(e) => setPostalCode(e.target.value)}
                     />
@@ -426,7 +434,7 @@ const Checkout = () => {
                     </div>
                     <span className="text-sm font-medium text-black">Standard</span>
                   </div>
-                  <span className="text-sm font-medium text-black">Free</span>
+                  <span className="text-sm font-medium text-black">{currencyCode} {shipping.toFixed(2)}</span>
                 </div>
               </section>
 
@@ -627,7 +635,7 @@ const Checkout = () => {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Shipping</span>
-                      <span className="text-sm font-medium">Free</span>
+                      <span className="text-sm font-medium">{currencyCode} {shipping.toFixed(2)}</span>
                     </div>
                   </div>
 
